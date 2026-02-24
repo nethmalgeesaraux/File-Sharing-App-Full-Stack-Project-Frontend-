@@ -1,4 +1,5 @@
 import React from 'react'
+import { SignInButton, SignUpButton } from '@clerk/clerk-react'
 import { assets } from '../../assets/assets'
 
 const Hero = () => {
@@ -20,12 +21,16 @@ const Hero = () => {
             </p>
             <div className="mt-10 max-w-sm mx-auto sm:max-w-none sm:flex sm:justify-center">
               <div className="space-y-4 sm:space-y-0 sm:mx-auto sm:inline-grid sm:grid-cols-2 sm:gap-5">
-                <button className="group inline-flex items-center justify-center px-7 py-3.5 bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 text-white font-semibold rounded-xl shadow-lg shadow-purple-300/40 hover:shadow-xl hover:shadow-purple-400/50 hover:-translate-y-0.5 transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2">
-                  Get Started
-                </button>
-                <button className="group inline-flex items-center justify-center px-7 py-3.5 bg-white/85 text-gray-800 font-semibold rounded-xl border border-purple-200 shadow-md shadow-purple-100/50 hover:bg-white hover:text-purple-700 hover:border-purple-300 hover:-translate-y-0.5 transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2">
-                  Sign In
-                </button>
+                <SignUpButton mode="modal">
+                  <button className="group inline-flex items-center justify-center px-7 py-3.5 bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 text-white font-semibold rounded-xl shadow-lg shadow-purple-300/40 hover:shadow-xl hover:shadow-purple-400/50 hover:-translate-y-0.5 transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2">
+                    Get Started
+                  </button>
+                </SignUpButton>
+                <SignInButton mode="modal">
+                  <button className="group inline-flex items-center justify-center px-7 py-3.5 bg-white/85 text-gray-800 font-semibold rounded-xl border border-purple-200 shadow-md shadow-purple-100/50 hover:bg-white hover:text-purple-700 hover:border-purple-300 hover:-translate-y-0.5 transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2">
+                    Sign In
+                  </button>
+                </SignInButton>
               </div>
             </div>
           </div>
