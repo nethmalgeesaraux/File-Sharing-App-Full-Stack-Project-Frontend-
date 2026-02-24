@@ -1,5 +1,6 @@
 import React from 'react'
 import { Check } from 'lucide-react'
+import { SignUpButton } from '@clerk/clerk-react'
 
 const Pricing = () => {
   const plans = [
@@ -92,15 +93,17 @@ const Pricing = () => {
                 </ul>
 
                 <div className="mt-auto pt-8">
-                  <button
-                    className={`w-full rounded-md border px-4 py-3 font-semibold transition ${
-                      plan.highlighted
-                        ? 'border-purple-600 bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white hover:from-purple-700 hover:to-fuchsia-700'
-                        : 'border-gray-200 bg-white text-purple-700 hover:bg-purple-50'
-                    }`}
-                  >
-                    {plan.cta}
-                  </button>
+                  <SignUpButton mode="modal">
+                    <button
+                      className={`w-full rounded-md border px-4 py-3 font-semibold transition ${
+                        plan.highlighted
+                          ? 'border-purple-600 bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white hover:from-purple-700 hover:to-fuchsia-700'
+                          : 'border-gray-200 bg-white text-purple-700 hover:bg-purple-50'
+                      }`}
+                    >
+                      {plan.cta}
+                    </button>
+                  </SignUpButton>
                 </div>
               </div>
             </article>

@@ -1,4 +1,5 @@
 import React from 'react'
+import { SignUpButton } from '@clerk/clerk-react'
 
 const CTAsection = () => {
   return (
@@ -12,9 +13,11 @@ const CTAsection = () => {
               Create your account today.
             </h2>
 
-            <button className="inline-flex items-center justify-center rounded-md border border-gray-200 bg-white px-6 py-3 text-lg font-semibold text-purple-700 shadow-sm transition hover:bg-gray-100">
-              Sign up for free
-            </button>
+            <SignUpButton mode="modal">
+              <button className="inline-flex items-center justify-center rounded-md border border-gray-200 bg-white px-6 py-3 text-lg font-semibold text-purple-700 shadow-sm transition hover:bg-gray-100">
+                Sign up for free
+              </button>
+            </SignUpButton>
           </div>
         </div>
       </div>
