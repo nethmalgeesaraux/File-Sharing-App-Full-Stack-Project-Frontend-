@@ -1,16 +1,19 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import DashboardLayout from '../layouts/DashboardLayout'
 import { useAuth } from '@clerk/clerk-react'
-import { ReceiptText, Coins, BadgeDollarSign } from 'lucide-react'
+import { ReceiptText, Coins, BadgeDollarSign, RefreshCw } from 'lucide-react'
 
 const Transactions = () => {
   const { getToken } = useAuth()
   const [transactions, setTransactions] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [refreshKey, setRefreshKey] = useState(0)
+  const [lastUpdated, setLastUpdated] = useState(null)
 
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || ''
   const transactionsEndpoint = import.meta.env.VITE_TRANSACTIONS_ENDPOINT || '/api/transactions'
+  const transactionsEndpointsCsv = import.meta.env.VITE_TRANSACTIONS_ENDPOINTS || ''
 
   const normalizeTransactions = (payload) => {
     const source =
@@ -37,6 +40,15 @@ const Transactions = () => {
 
   const formatCurrency = (value) => `$${Number(value || 0).toFixed(2)}`
 
+  const endpointsToTry = useMemo(() => {
+    const fromCsv = transactionsEndpointsCsv
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean)
+    const defaults = ['/api/transactions', '/api/payments/transactions', '/api/transactions/history']
+    return Array.from(new Set([transactionsEndpoint, ...fromCsv, ...defaults]))
+  }, [transactionsEndpoint, transactionsEndpointsCsv])
+
   useEffect(() => {
     const controller = new AbortController()
 
@@ -45,24 +57,37 @@ const Transactions = () => {
         setLoading(true)
         setError('')
         const token = await getToken()
-        const response = await fetch(`${apiBaseUrl}${transactionsEndpoint}`, {
-          method: 'GET',
-          headers: {
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          signal: controller.signal,
-        })
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch transactions (${response.status})`)
+        let data = null
+        let resolved = false
+
+        for (const endpoint of endpointsToTry) {
+          const response = await fetch(`${apiBaseUrl}${endpoint}`, {
+            method: 'GET',
+            headers: {
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            credentials: 'include',
+            signal: controller.signal,
+          })
+
+          if (!response.ok) continue
+
+          data = await response.json()
+          resolved = true
+          break
         }
 
-        const data = await response.json()
+        if (!resolved) {
+          throw new Error('No transaction endpoint returned success.')
+        }
+
         setTransactions(normalizeTransactions(data))
+        setLastUpdated(new Date())
       } catch (err) {
         if (err.name !== 'AbortError') {
           setTransactions([])
-          setError('Could not load transactions from backend.')
+          setError('Could not load transactions from backend. Check endpoint/auth.')
         }
       } finally {
         if (!controller.signal.aborted) {
@@ -72,9 +97,8 @@ const Transactions = () => {
     }
 
     fetchTransactions()
-
     return () => controller.abort()
-  }, [apiBaseUrl, getToken, transactionsEndpoint])
+  }, [apiBaseUrl, endpointsToTry, getToken, refreshKey])
 
   const summary = useMemo(() => {
     const totalSpent = transactions.reduce((sum, item) => sum + item.amount, 0)
@@ -89,9 +113,23 @@ const Transactions = () => {
   return (
     <DashboardLayout>
       <div className="h-[calc(100vh-7.5rem)] rounded-sm border border-gray-200 bg-[#f8f8fb] p-5">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Transactions</h1>
-          <p className="mt-1 text-sm text-gray-600">All payment and credit purchase history.</p>
+        <div className="mb-6 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Transactions</h1>
+            <p className="mt-1 text-sm text-gray-600">All payment and credit purchase history.</p>
+            {lastUpdated ? (
+              <p className="mt-1 text-xs text-gray-500">Last updated: {lastUpdated.toLocaleString()}</p>
+            ) : null}
+          </div>
+          <button
+            type="button"
+            onClick={() => setRefreshKey((prev) => prev + 1)}
+            disabled={loading}
+            className="inline-flex h-10 items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
         </div>
 
         <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">

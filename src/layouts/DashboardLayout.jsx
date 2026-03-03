@@ -61,6 +61,7 @@ const navItems = [
 const DashboardLayout = ({ children }) => {
   const location = useLocation()
   const { user } = useUser()
+  const profileLogoUrl = '/svg.png'
 
   return (
     <div className="min-h-screen bg-[#f6f6fa]">
@@ -81,9 +82,11 @@ const DashboardLayout = ({ children }) => {
           </Link>
 
           <div className="mt-10 flex flex-col items-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-b from-violet-600 to-blue-500 text-2xl font-semibold text-white">
-              {user?.firstName?.[0] || user?.username?.[0] || 'U'}
-            </div>
+            <img
+              src={profileLogoUrl}
+              alt="Profile logo"
+              className="h-16 w-16 rounded-full object-cover ring-2 ring-white shadow-sm"
+            />
             <p className="mt-3 text-sm font-medium text-gray-900">
               {user?.fullName || user?.firstName || 'User'}
             </p>

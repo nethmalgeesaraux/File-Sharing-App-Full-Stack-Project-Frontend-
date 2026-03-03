@@ -16,31 +16,31 @@ const Subscription = () => {
   const plans = useMemo(
     () => [
       {
-        id: 'starter',
-        name: 'Starter',
-        price: 5,
-        credits: 50,
-        description: 'Small personal use',
+        id: 'free',
+        name: 'Free',
+        price: 0,
+        credits: 5,
+        description: 'Perfect for getting started',
         popular: false,
-        features: ['50 upload credits', 'Basic support', 'Share links'],
+        features: ['5 file uploads', 'Basic file sharing', '7-day file retention', 'Email support'],
       },
       {
-        id: 'pro',
-        name: 'Pro',
-        price: 12,
-        credits: 150,
-        description: 'Best for freelancers',
-        popular: true,
-        features: ['150 upload credits', 'Priority support', 'Advanced sharing'],
-      },
-      {
-        id: 'business',
-        name: 'Business',
-        price: 29,
+        id: 'premium',
+        name: 'Premium',
+        price: 500,
         credits: 500,
-        description: 'For teams',
+        description: 'For individuals with larger needs',
+        popular: true,
+        features: ['500 file uploads', 'Advanced file sharing', '30-day file retention', 'Priority email support', 'File analytics'],
+      },
+      {
+        id: 'ultimate',
+        name: 'Ultimate',
+        price: 2500,
+        credits: 5000,
+        description: 'For teams and businesses',
         popular: false,
-        features: ['500 upload credits', 'Team-ready usage', 'Fast support'],
+        features: ['5000 file uploads', 'Team sharing capabilities', 'Unlimited file retention', '24/7 priority support', 'Advanced analytics', 'API access'],
       },
     ],
     []
@@ -74,6 +74,7 @@ const Subscription = () => {
           planName: plan.name,
           amount: plan.price,
           credits: plan.credits,
+          currency: 'LKR',
           successUrl: `${window.location.origin}/subscription?payment=success`,
           cancelUrl: `${window.location.origin}/subscription?payment=cancel`,
         }),
@@ -85,14 +86,13 @@ const Subscription = () => {
 
       const data = await response.json()
       const checkoutUrl = getCheckoutUrlFromPayload(data)
-
       if (!checkoutUrl) {
-        throw new Error('No checkout url returned from backend.')
+        throw new Error('No checkout URL returned from backend.')
       }
 
       window.location.href = checkoutUrl
     } catch {
-      setError('Payment session create karanna bari una. Backend endpoint eka check karanna.')
+      setError('Unable to create payment session. Please check the backend endpoint.')
     } finally {
       setLoadingPlanId(null)
     }
@@ -117,12 +117,12 @@ const Subscription = () => {
       const data = await response.json()
       const portalUrl = getCheckoutUrlFromPayload(data)
       if (!portalUrl) {
-        throw new Error('No portal url returned.')
+        throw new Error('No portal URL returned.')
       }
 
       window.location.href = portalUrl
     } catch {
-      setError('Billing portal open karanna bari una. Backend endpoint eka check karanna.')
+      setError('Unable to open billing portal. Please check the backend endpoint.')
     } finally {
       setLoadingPortal(false)
     }
@@ -134,7 +134,7 @@ const Subscription = () => {
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Subscription Plans</h1>
-            <p className="mt-1 text-sm text-gray-600">Plan එකක් select කරලා online payment කරන්න.</p>
+            <p className="mt-1 text-sm text-gray-600">Select a plan and complete your payment online.</p>
           </div>
           <button
             type="button"
@@ -149,7 +149,7 @@ const Subscription = () => {
 
         {paymentStatus === 'success' ? (
           <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
-            Payment success. Credits soon update වෙයි.
+            Payment successful. Credits will be updated shortly.
           </div>
         ) : null}
 
@@ -165,33 +165,28 @@ const Subscription = () => {
           </div>
         ) : null}
 
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+        <div className="grid grid-cols-1 items-stretch gap-5 md:grid-cols-3">
           {plans.map((plan) => (
             <article
               key={plan.id}
               className={`relative rounded-xl border bg-white p-5 shadow-sm ${
-                plan.popular ? 'border-blue-400 ring-2 ring-blue-100' : 'border-gray-200'
-              }`}
+                plan.popular ? 'border-violet-500 ring-2 ring-violet-100' : 'border-gray-200'
+              } flex h-full flex-col`}
             >
               {plan.popular ? (
-                <span className="absolute right-4 top-4 rounded-full bg-blue-600 px-2.5 py-1 text-xs font-semibold text-white">
+                <span className="absolute right-4 top-4 rounded-full bg-violet-100 px-2.5 py-1 text-xs font-semibold text-violet-700">
                   Popular
                 </span>
               ) : null}
 
-              <h2 className="text-xl font-bold text-gray-900">{plan.name}</h2>
+              <h2 className="text-4xl font-bold text-gray-900">{plan.name}</h2>
+              <p className="mt-1 text-2xl font-bold text-gray-900">Rs {plan.price}</p>
               <p className="mt-1 text-sm text-gray-600">{plan.description}</p>
-              <p className="mt-4 text-4xl font-bold text-gray-900">${plan.price}</p>
-              <p className="text-sm text-gray-500">one-time</p>
 
-              <div className="mt-4 inline-flex items-center rounded-md bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-700">
-                +{plan.credits} credits
-              </div>
-
-              <ul className="mt-4 space-y-2">
+              <ul className="mt-5 space-y-2">
                 {plan.features.map((feature) => (
                   <li key={feature} className="flex items-center gap-2 text-sm text-gray-700">
-                    <Check className="h-4 w-4 text-green-600" />
+                    <Check className="h-4 w-4 text-violet-600" />
                     {feature}
                   </li>
                 ))}
@@ -201,10 +196,14 @@ const Subscription = () => {
                 type="button"
                 onClick={() => openCheckout(plan)}
                 disabled={loadingPlanId !== null}
-                className="mt-6 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-blue-600 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
+                className={`mt-auto inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                  plan.popular
+                    ? 'bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white hover:opacity-95'
+                    : 'border border-gray-200 bg-white text-violet-700 hover:bg-violet-50'
+                }`}
               >
                 {loadingPlanId === plan.id ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
-                {loadingPlanId === plan.id ? 'Redirecting...' : `Pay $${plan.price}`}
+                {loadingPlanId === plan.id ? 'Redirecting...' : plan.price === 0 ? 'Get Started' : `Pay Rs ${plan.price}`}
               </button>
             </article>
           ))}
